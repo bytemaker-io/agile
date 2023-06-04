@@ -19,6 +19,12 @@ type Macaddress struct {
 	Mac  string `json:"macaddress"`
 	Time string `json:"time"`
 }
+/*
+*
+Author:kalean
+Time:2023/05/03
+*
+*/
 
 func main() {
 	conn, err := amqp.Dial("amqp://root:123456@192.168.1.196:5672/")
