@@ -106,12 +106,10 @@ func getInterfacemode() string {
 	cmd := exec.Command("iw", "dev", InterfaceName, "info")
 	output, err := cmd.Output()
 
-	// 处理错误
 	if err != nil {
 		log.Panic("command execution failed:", err)
 	}
 
-	// 将输出转换为字符串
 	outputStr := string(output)
 
 	fields := strings.Fields(outputStr)
@@ -135,8 +133,8 @@ func getInterfaceStatus() string {
 		log.Panic("command execution failed:", err)
 	}
 	outputStr := string(output)
-	fields := strings.Fields(outputStr)  // 按空格分割字符串
-	stateIdx := indexOf(fields, "state") // 获取 "state" 的位置
+	fields := strings.Fields(outputStr)
+	stateIdx := indexOf(fields, "state")
 	if stateIdx == -1 || stateIdx+1 >= len(fields) {
 		log.Panic("Failed to get state")
 	}
