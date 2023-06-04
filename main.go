@@ -2,15 +2,23 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"os/exec"
 	"regexp"
 	"sniffmac/statusinit"
+	"strconv"
+	"time"
 
 	"github.com/streadway/amqp"
 )
+
+type Macaddress struct {
+	Mac  string `json:"macaddress"`
+	Time string `json:"time"`
+}
 
 func main() {
 	conn, err := amqp.Dial("amqp://root:123456@192.168.1.196:5672/")
@@ -66,13 +74,25 @@ func main() {
 			}
 			panic(err)
 		}
-		// 搜索 MAC 地址
+
 		mac := macRegexp.FindString(line)
 		if mac != "" && !macAddresses[mac] {
 			macAddresses[mac] = true
+			timestamp := time.Now().Unix()
+			timestampStr := strconv.FormatInt(timestamp, 10)
 
-			body := mac
-			fmt.Println("Discovery a new MACaddress" + mac)
+			body := Macaddress{
+				Mac:  mac,
+				Time: timestampStr,
+			}
+			jsonBytes, err := json.Marshal(body)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+
+			jsonStr := string(jsonBytes)
+			fmt.Println("Discovery a new MACaddress" + jsonStr)
 			err = ch.Publish(
 				"",     //
 				q.Name, //
@@ -80,7 +100,7 @@ func main() {
 				false,  //
 				amqp.Publishing{
 					ContentType: "text/plain",
-					Body:        []byte(body),
+					Body:        []byte(jsonStr),
 				},
 			)
 		}
